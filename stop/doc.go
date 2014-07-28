@@ -1,12 +1,12 @@
 // Package stop represents a pattern for types that need to do some work
-// when stopping. The Stop method returns a stop.Chan on which
+// when stopping. The Stop method returns a <-chan struct{} on which
 // stop.Done is passed when the operation has completed.
 //
-// Stopper types when implementing the Stop method should use MakeChan
+// Stopper types when implementing the Stop method should use Make
 // to create and return a stop channel, and pass stop.Done on the
 // channel once stopping has completed:
-//     func (t Type) Stop() stop.Chan {
-//       c := stop.MakeChan()
+//     func (t Type) Stop() <-chan struct{} {
+//       c := stop.Make()
 //       go func(){
 //         // TODO: tear stuff down
 //         c <- stop.Done
@@ -16,7 +16,7 @@
 //
 // If Stopper types do not need to do any background work, stop.Stopped() can
 // be returned, for example:
-//     func (t Type) Stop() stop.Chan {
+//     func (t Type) Stop() <-chan struct{} {
 //       t.stopped = true
 //       return stop.Stopped()
 //     }
