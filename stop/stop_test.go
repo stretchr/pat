@@ -9,7 +9,7 @@ import (
 
 type testStopper struct{}
 
-func (t *testStopper) Stop() <-chan struct{} {
+func (t *testStopper) Stop() <-chan stop.Signal {
 	s := stop.Make()
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -20,7 +20,7 @@ func (t *testStopper) Stop() <-chan struct{} {
 
 type noopStopper struct{}
 
-func (t *noopStopper) Stop() <-chan struct{} {
+func (t *noopStopper) Stop() <-chan stop.Signal {
 	return stop.Stopped()
 }
 
