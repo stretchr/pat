@@ -13,10 +13,19 @@ type Stopper interface {
 	Stop() Chan
 }
 
+// Now returns a Chan that signals immediately. Useful for
+// cases when no tear-down work is required and stopping is
+// immediate.
+func Now() Chan {
+	c := MakeChan()
+	c <- Done
+	return c
+}
+
 // MakeChan makes a new Chan used to indicate when
-// stopping has finished.
+// stopping has finished. Sends to Chan will not block.
 func MakeChan() Chan {
-	return make(chan struct{})
+	return make(chan struct{}, 1)
 }
 
 // All stops all Stopper types and returns another Chan
