@@ -10,6 +10,9 @@ type Chan chan struct{}
 // Stopper represents types that implement
 // the stop channel pattern.
 type Stopper interface {
+	// Stop instructs the type to halt operations and
+	// returns a Chan on which a stop.Done signal is sent
+	// when stopping has completed.
 	Stop() Chan
 }
 
