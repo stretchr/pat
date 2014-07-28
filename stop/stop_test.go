@@ -21,7 +21,7 @@ func (t *testStopper) Stop() stop.Chan {
 type noopStopper struct{}
 
 func (t *noopStopper) Stop() stop.Chan {
-	return stop.Now()
+	return stop.Stopped()
 }
 
 func TestStop(t *testing.T) {

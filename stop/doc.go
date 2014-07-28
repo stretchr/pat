@@ -14,11 +14,11 @@
 //       return c
 //     }
 //
-// If Stopper types do not need to do any background work, stop.Now() can
+// If Stopper types do not need to do any background work, stop.Stopped() can
 // be returned, for example:
 //     func (t Type) Stop() stop.Chan {
 //       t.stopped = true
-//       return stop.Now()
+//       return stop.Stopped()
 //     }
 //
 // Stopper types can be stopped in the following ways:

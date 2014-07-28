@@ -13,10 +13,10 @@ type Stopper interface {
 	Stop() Chan
 }
 
-// Now returns a Chan that signals immediately. Useful for
+// Stopped returns a Chan that signals immediately. Useful for
 // cases when no tear-down work is required and stopping is
 // immediate.
-func Now() Chan {
+func Stopped() Chan {
 	c := MakeChan()
 	c <- Done
 	return c
