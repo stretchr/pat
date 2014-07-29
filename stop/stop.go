@@ -5,6 +5,10 @@ import "time"
 // Signal is the type that gets sent down the stop channel.
 type Signal struct{}
 
+// NoWait represents a time.Duration with zero value.
+// Logically meaning no grace wait period when stopping.
+var NoWait time.Duration = 0
+
 // Stopper represents types that implement
 // the stop channel pattern.
 type Stopper interface {
