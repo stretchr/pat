@@ -7,27 +7,34 @@ import (
 	"github.com/stretchr/pat/stop"
 )
 
-type testStopper struct{}
+type testStopper struct {
+	stopChan chan stop.Signal
+}
 
-func (t *testStopper) Stop(wait time.Duration) <-chan stop.Signal {
-	s := stop.Make()
+func (t *testStopper) Stop(wait time.Duration) {
+	t.stopChan = stop.Make()
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		s <- stop.Done
+		t.stopChan <- stop.Done
 	}()
-	return s
+}
+func (t *testStopper) StopChan() <-chan stop.Signal {
+	return t.stopChan
 }
 
 type noopStopper struct{}
 
-func (t *noopStopper) Stop() <-chan stop.Signal {
+func (t *noopStopper) Stop() {
+}
+func (t *noopStopper) StopChan() <-chan stop.Signal {
 	return stop.Stopped()
 }
 
 func TestStop(t *testing.T) {
 
 	s := new(testStopper)
-	stopChan := s.Stop(1 * time.Second)
+	s.Stop(1 * time.Second)
+	stopChan := s.StopChan()
 	select {
 	case <-stopChan:
 	case <-time.After(1 * time.Second):
@@ -53,7 +60,8 @@ func TestAll(t *testing.T) {
 func TestNoop(t *testing.T) {
 
 	s := new(noopStopper)
-	stopChan := s.Stop()
+	s.Stop()
+	stopChan := s.StopChan()
 	select {
 	case <-stopChan:
 	case <-time.After(1 * time.Second):

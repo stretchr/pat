@@ -15,7 +15,9 @@ type Stopper interface {
 	// Stop instructs the type to halt operations and
 	// returns a channel on which a stop.Done signal is sent
 	// when stopping has completed.
-	Stop(wait time.Duration) <-chan Signal
+	Stop(wait time.Duration)
+
+	StopChan() <-chan Signal
 }
 
 // Stopped returns a channel that signals immediately. Useful for
@@ -41,7 +43,8 @@ func All(wait time.Duration, stoppers ...Stopper) <-chan Signal {
 	go func() {
 		var allChans []<-chan Signal
 		for _, stopper := range stoppers {
-			allChans = append(allChans, stopper.Stop(wait))
+			stopper.Stop(wait)
+			allChans = append(allChans, stopper.StopChan())
 		}
 		for _, ch := range allChans {
 			<-ch
