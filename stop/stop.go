@@ -5,18 +5,15 @@ import "time"
 // Signal is the type that gets sent down the stop channel.
 type Signal struct{}
 
-// Done is the Signal variable sent on the channel to indicate
-// that something has stopped.
-var Done = Signal{}
-
 // Stopper represents types that implement
 // the stop channel pattern.
 type Stopper interface {
-	// Stop instructs the type to halt operations and
-	// returns a channel on which a stop.Done signal is sent
-	// when stopping has completed.
+	// Stop instructs the type to halt operations and close
+	// the stop channel when it is finished.
 	Stop(wait time.Duration)
-
+	// StopChan gets the stop channel which will block until
+	// stopping has completed, at which point it is closed.
+	// Callers should never close the stop channel.
 	StopChan() <-chan Signal
 }
 
@@ -25,19 +22,18 @@ type Stopper interface {
 // immediate.
 func Stopped() <-chan Signal {
 	c := Make()
-	c <- Done
+	close(c)
 	return c
 }
 
 // Make makes a new channel used to indicate when
 // stopping has finished. Sends to channel will not block.
 func Make() chan Signal {
-	return make(chan Signal, 1)
+	return make(chan Signal, 0)
 }
 
 // All stops all Stopper types and returns another channel
-// on which Done will be sent once all things have
-// finished stopping.
+// which will close once all things have finished stopping.
 func All(wait time.Duration, stoppers ...Stopper) <-chan Signal {
 	all := Make()
 	go func() {
@@ -49,7 +45,7 @@ func All(wait time.Duration, stoppers ...Stopper) <-chan Signal {
 		for _, ch := range allChans {
 			<-ch
 		}
-		all <- Done
+		close(all)
 	}()
 	return all
 }

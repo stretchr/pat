@@ -15,7 +15,7 @@ func (t *testStopper) Stop(wait time.Duration) {
 	t.stopChan = stop.Make()
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		t.stopChan <- stop.Done
+		close(t.stopChan)
 	}()
 }
 func (t *testStopper) StopChan() <-chan stop.Signal {

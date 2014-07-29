@@ -1,10 +1,9 @@
 // Package stop represents a pattern for types that need to do some work
-// when stopping. The StopChan method returns a <-chan stop.Signal on which
-// stop.Done is passed when the operation has completed.
+// when stopping. The StopChan method returns a <-chan stop.Signal which
+// is closed when the operation has completed.
 //
 // Stopper types when implementing the stop channel pattern should use stop.Make
-// to create and store a stop channel, and pass stop.Done on the
-// channel once stopping has completed:
+// to create and store a stop channel, and close the channel once stopping has completed:
 //     func New() Type {
 //       t := new(Type)
 //       t.stopChan = stop.Make()
@@ -13,7 +12,7 @@
 //     func (t Type) Stop() {
 //       go func(){
 //         // TODO: tear stuff down
-//         t.stopChan <- stop.Done
+//         close(t.stopChan)
 //       }()
 //     }
 //     func (t Type) StopChan() <-chan stop.Signal {
