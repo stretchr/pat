@@ -1,5 +1,7 @@
 package stop
 
+import "time"
+
 // Signal is the type that gets sent down the stop channel.
 type Signal struct{}
 
@@ -13,7 +15,7 @@ type Stopper interface {
 	// Stop instructs the type to halt operations and
 	// returns a channel on which a stop.Done signal is sent
 	// when stopping has completed.
-	Stop() <-chan Signal
+	Stop(wait time.Duration) <-chan Signal
 }
 
 // Stopped returns a channel that signals immediately. Useful for
@@ -34,12 +36,12 @@ func Make() chan Signal {
 // All stops all Stopper types and returns another channel
 // on which Done will be sent once all things have
 // finished stopping.
-func All(stoppers ...Stopper) <-chan Signal {
+func All(wait time.Duration, stoppers ...Stopper) <-chan Signal {
 	all := Make()
 	go func() {
 		var allChans []<-chan Signal
 		for _, stopper := range stoppers {
-			allChans = append(allChans, stopper.Stop())
+			allChans = append(allChans, stopper.Stop(wait))
 		}
 		for _, ch := range allChans {
 			<-ch

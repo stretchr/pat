@@ -9,7 +9,7 @@ import (
 
 type testStopper struct{}
 
-func (t *testStopper) Stop() <-chan stop.Signal {
+func (t *testStopper) Stop(wait time.Duration) <-chan stop.Signal {
 	s := stop.Make()
 	go func() {
 		time.Sleep(100 * time.Millisecond)
@@ -27,7 +27,7 @@ func (t *noopStopper) Stop() <-chan stop.Signal {
 func TestStop(t *testing.T) {
 
 	s := new(testStopper)
-	stopChan := s.Stop()
+	stopChan := s.Stop(1 * time.Second)
 	select {
 	case <-stopChan:
 	case <-time.After(1 * time.Second):
@@ -43,7 +43,7 @@ func TestAll(t *testing.T) {
 	s3 := new(testStopper)
 
 	select {
-	case <-stop.All(s1, s2, s3):
+	case <-stop.All(1*time.Second, s1, s2, s3):
 	case <-time.After(1 * time.Second):
 		t.Error("All signal was never sent (timed out)")
 	}
