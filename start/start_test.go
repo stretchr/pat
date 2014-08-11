@@ -93,3 +93,19 @@ func TestMustAll(t *testing.T) {
 	require.False(t, s3.running)
 
 }
+
+func TestStopAll(t *testing.T) {
+
+	s1 := &TestStarter{}
+	s2 := &TestStarter{}
+	s3 := &ErrorStarter{}
+
+	start.All(s1, s2, s3)
+
+	<-start.StopAll(1*time.Second, s1, s2, s3)
+
+	require.False(t, s1.running)
+	require.False(t, s2.running)
+	require.False(t, s3.running)
+
+}

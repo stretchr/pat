@@ -70,3 +70,14 @@ func MustAll(stopGrace time.Duration, startStoppers ...StartStopper) map[StartSt
 	}
 	return errs
 }
+
+// StopAll stops all StartStopper types and returns another channel
+// which will close once all things have finished stopping.
+// For more information, see stop.All.
+func StopAll(stopGrace time.Duration, startStoppers ...StartStopper) <-chan stop.Signal {
+	stoppers := make([]stop.Stopper, len(startStoppers))
+	for i, ss := range startStoppers {
+		stoppers[i] = ss.(stop.Stopper)
+	}
+	return stop.All(stopGrace, stoppers...)
+}
