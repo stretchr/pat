@@ -26,8 +26,9 @@ type Sleeper interface {
 	// when all intervals have been exhausted.
 	// Sleeper automatically resets after all intervals have been exhausted.
 	Sleep() Action
-	// Reset manually resets the Sleeper.
-	Reset()
+	// Reset manually resets the Sleeper if it needs resetting.
+	// Returns whether the sleep was reset or not.
+	Reset() bool
 	// Abort manually aborts the Sleeper, cancelling the current call
 	// to Sleep.
 	Abort()
@@ -102,15 +103,16 @@ func (s *sleeper) Sleep() Action {
 	return ret
 }
 
-func (s *sleeper) Reset() {
+func (s *sleeper) Reset() bool {
 	if !s.shouldReset {
-		return
+		return false
 	}
 	s.current = 0
 	for _, i := range s.ints {
 		i.current = 0
 	}
 	s.shouldReset = false
+	return true
 }
 
 func (s *sleeper) Abort() {

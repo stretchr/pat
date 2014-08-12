@@ -86,6 +86,9 @@ func TestAbort(t *testing.T) {
 	wg.Wait()
 	require.Equal(t, sleeps, 1)
 
+	require.True(t, s.Reset())
+	require.False(t, s.Reset())
+
 }
 
 func TestPanics(t *testing.T) {
