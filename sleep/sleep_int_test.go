@@ -15,29 +15,38 @@ func TestSleeper(t *testing.T) {
 	s.Add(1*time.Minute, 10*time.Second)
 	s.Add(10*time.Minute, 1*time.Minute)
 
-	var durations []time.Duration
+	var sleepDurs []time.Duration
 	s.sleep = func(d time.Duration) Action {
-		durations = append(durations, d)
+		sleepDurs = append(sleepDurs, d)
 		return carryon
 	}
 
+	require.Equal(t, 1*time.Second, s.Duration())
+
+	var durations []time.Duration
+	for s.Sleep() != Abort {
+		durations = append(durations, s.Duration())
+	}
+
+	require.Equal(t, len(sleepDurs), 76)
+	require.Equal(t, sleepDurs[0], 1*time.Second)   // 1st call
+	require.Equal(t, sleepDurs[65], 10*time.Second) // 66th call
+	require.Equal(t, sleepDurs[75], 1*time.Minute)  // 76th call
+
+	require.Equal(t, durations[1], 1*time.Second)   // 1st call
+	require.Equal(t, durations[64], 10*time.Second) // 66th call
+	require.Equal(t, durations[74], 1*time.Minute)  // 76th call
+
+	sleepDurs = make([]time.Duration, 0)
+	require.Equal(t, 1*time.Second, s.Duration())
+
 	for s.Sleep() != Abort {
 	}
 
-	require.Equal(t, len(durations), 76)
-	require.Equal(t, durations[0], 1*time.Second)   // 1st call
-	require.Equal(t, durations[65], 10*time.Second) // 66th call
-	require.Equal(t, durations[75], 1*time.Minute)  // 76th call
-
-	durations = make([]time.Duration, 0)
-
-	for s.Sleep() != Abort {
-	}
-
-	require.Equal(t, len(durations), 76)
-	require.Equal(t, durations[0], 1*time.Second)   // 1st call
-	require.Equal(t, durations[65], 10*time.Second) // 66th call
-	require.Equal(t, durations[75], 1*time.Minute)  // 76th call
+	require.Equal(t, len(sleepDurs), 76)
+	require.Equal(t, sleepDurs[0], 1*time.Second)   // 1st call
+	require.Equal(t, sleepDurs[65], 10*time.Second) // 66th call
+	require.Equal(t, sleepDurs[75], 1*time.Minute)  // 76th call
 
 }
 

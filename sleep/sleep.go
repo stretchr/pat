@@ -31,6 +31,8 @@ type Sleeper interface {
 	// Abort manually aborts the Sleeper, cancelling the current call
 	// to Sleep.
 	Abort()
+	// Duration gets the next time.Duration that Sleep() will sleep for.
+	Duration() time.Duration
 }
 
 type sleeper struct {
@@ -75,6 +77,13 @@ func (s *sleeper) Add(duration, sleep time.Duration) {
 		panic("sleep: duration must be divisible by sleep")
 	}
 	s.ints = append(s.ints, &interval{sleep: sleep, count: int(duration / sleep)})
+}
+
+func (s *sleeper) Duration() time.Duration {
+	if s.current == len(s.ints) {
+		return 0
+	}
+	return s.ints[s.current].sleep
 }
 
 func (s *sleeper) Sleep() Action {
