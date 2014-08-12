@@ -11,8 +11,13 @@ type testStopper struct {
 	stopChan chan stop.Signal
 }
 
+func NewTestStopper() *testStopper {
+	s := new(testStopper)
+	s.stopChan = stop.Make()
+	return s
+}
+
 func (t *testStopper) Stop(wait time.Duration) {
-	t.stopChan = stop.Make()
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		close(t.stopChan)
@@ -32,7 +37,7 @@ func (t *noopStopper) StopChan() <-chan stop.Signal {
 
 func TestStop(t *testing.T) {
 
-	s := new(testStopper)
+	s := NewTestStopper()
 	s.Stop(1 * time.Second)
 	stopChan := s.StopChan()
 	select {
@@ -45,9 +50,9 @@ func TestStop(t *testing.T) {
 
 func TestAll(t *testing.T) {
 
-	s1 := new(testStopper)
-	s2 := new(testStopper)
-	s3 := new(testStopper)
+	s1 := NewTestStopper()
+	s2 := NewTestStopper()
+	s3 := NewTestStopper()
 
 	select {
 	case <-stop.All(1*time.Second, s1, s2, s3):

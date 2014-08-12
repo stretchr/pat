@@ -7,7 +7,7 @@ type Signal struct{}
 
 // NoWait represents a time.Duration with zero value.
 // Logically meaning no grace wait period when stopping.
-var NoWait time.Duration = 0
+var NoWait time.Duration
 
 // Stopper represents types that implement
 // the stop channel pattern.
@@ -18,6 +18,8 @@ type Stopper interface {
 	// StopChan gets the stop channel which will block until
 	// stopping has completed, at which point it is closed.
 	// Callers should never close the stop channel.
+	// The StopChan should exist from the point at which operations
+	// begun, not the point at which Stop was called.
 	StopChan() <-chan Signal
 }
 
@@ -43,7 +45,7 @@ func All(wait time.Duration, stoppers ...Stopper) <-chan Signal {
 	go func() {
 		var allChans []<-chan Signal
 		for _, stopper := range stoppers {
-			stopper.Stop(wait)
+			go stopper.Stop(wait)
 			allChans = append(allChans, stopper.StopChan())
 		}
 		for _, ch := range allChans {
