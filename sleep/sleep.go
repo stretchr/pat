@@ -36,10 +36,11 @@ type Sleeper interface {
 }
 
 type sleeper struct {
-	sleep   func(time.Duration) Action
-	ints    []*interval
-	current int
-	abort   chan struct{}
+	sleep       func(time.Duration) Action
+	ints        []*interval
+	current     int
+	abort       chan struct{}
+	shouldReset bool
 }
 
 type interval struct {
@@ -87,6 +88,7 @@ func (s *sleeper) Duration() time.Duration {
 }
 
 func (s *sleeper) Sleep() Action {
+	s.shouldReset = true
 	if s.current == len(s.ints) {
 		s.Reset()
 		return Abort
@@ -101,10 +103,14 @@ func (s *sleeper) Sleep() Action {
 }
 
 func (s *sleeper) Reset() {
+	if !s.shouldReset {
+		return
+	}
 	s.current = 0
 	for _, i := range s.ints {
 		i.current = 0
 	}
+	s.shouldReset = false
 }
 
 func (s *sleeper) Abort() {
